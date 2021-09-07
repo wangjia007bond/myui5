@@ -1,0 +1,14 @@
+### General project setup
+general:
+  verbose: true
+steps:
+  mtaBuild:
+    platform: 'CF'
+  cloudFoundryDeploy:
+    deployTool: 'mtaDeployPlugin'
+    deployType: 'standard'
+    cloudFoundry:
+      apiEndpoint: 'https://api.cf.us10.hana.ondemand.com' # default: 'https://api.cf.eu10.hana.ondemand.com'
+      org: 'd659d575trial'
+      space: 'sit'
+      credentialsId: '354b1e5f-2041-40bd-9e0f-2aebda1f968c'
