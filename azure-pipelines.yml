@@ -53,8 +53,6 @@ stages:
 - stage: prod_deploy
   displayName: Production deploy to SAP Cloud Platform (cf)
   jobs:
-    - deployment: publishprod
-      displayName: 'production environment deploy'
     - job: prod_deploy
       pool:
         vmImage: 'ubuntu-latest'
