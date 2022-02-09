@@ -1,0 +1,67 @@
+name: webapp
+resources:
+  containers:
+  - container: mta
+    image: 'devxci/mbtci-java11-node14'
+    options: --user 0:0
+  - container: cfcli
+    image: 'ppiper/cf-cli'
+    options: --user 0:0 --privileged
+
+trigger:
+- master
+
+stages:
+- stage: build
+  displayName: Build MTA for SAP Cloud Platform
+  jobs:
+    - job: build
+      pool:
+        vmImage: 'ubuntu-latest'
+      container: mta
+      steps:
+        - bash: 'mbt build -p=cf -t WebAppTarget'
+        - publish: $(System.DefaultWorkingDirectory)/.
+          artifact: WebApp
+
+- stage: dev_deploy
+  displayName: Dev deploy to SAP Cloud Platform (cf)
+  jobs:
+    - job: dev_deploy
+      pool:
+        vmImage: 'ubuntu-latest'
+      container: cfcli
+      steps:
+        - download: current
+          artifact: WebApp
+        - bash: 'cf login -u "$(CF-USER)" -p "$(CF-PASSWORD)" -a "$(CF-API)" -o "$(CF-ORG-DEV)" -s "$(CF-SPACE-DEV)" && cf deploy $(Pipeline.Workspace)/WebApp/WebAppTarget/*.mtar -f'
+
+
+- stage: uat_deploy
+  displayName: Test deploy to SAP Cloud Platform (cf)
+  jobs:
+    - job: uat_deploy
+      pool:
+        vmImage: 'ubuntu-latest'
+      container: cfcli
+      steps:
+        - download: current
+          artifact: WebApp
+        - bash: 'cf login -u "$(CF-USER)" -p "$(CF-PASSWORD)" -a "$(CF-API)" -o "$(CF-ORG-TEST)" -s "$(CF-SPACE-TEST)" && cf deploy $(Pipeline.Workspace)/WebApp/WebAppTarget/*.mtar -f'
+
+
+- stage: prod_deploy
+  displayName: Production deploy to SAP Cloud Platform (cf)
+  jobs:
+    - deployment: publishprod
+      displayName: 'production environment deploy'
+      environment: production
+    - job: prod_deploy
+      pool:
+        vmImage: 'ubuntu-latest'
+      container: cfcli
+      steps:
+        - download: current
+          artifact: WebApp
+        - bash: 'cf login -u "$(CF-USER)" -p "$(CF-PASSWORD)" -a "$(CF-API)" -o "$(CF-ORG-PROD)" -s "$(CF-SPACE-PROD)" && cf deploy $(Pipeline.Workspace)/WebApp/WebAppTarget/*.mtar -f'
+
