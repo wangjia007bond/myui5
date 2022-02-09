@@ -55,7 +55,6 @@ stages:
   jobs:
     - deployment: publishprod
       displayName: 'production environment deploy'
-      environment: production
     - job: prod_deploy
       pool:
         vmImage: 'ubuntu-latest'
