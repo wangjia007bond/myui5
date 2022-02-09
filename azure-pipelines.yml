@@ -38,7 +38,7 @@ stages:
 
 
 - stage: uat_deploy
-  displayName: Test deploy to SAP Cloud Platform (cf)
+  displayName: UAT deploy to SAP Cloud Platform (cf)
   jobs:
     - job: uat_deploy
       pool:
